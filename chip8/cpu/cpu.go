@@ -24,8 +24,8 @@ type Chip8 struct {
 	lastPressedKey byte
 	KeyState       uint16
 
-	delayTimer uint16
-	soundTimer uint16
+	delayTimer byte
+	soundTimer byte
 
 	random *rand.Rand
 }
@@ -53,171 +53,184 @@ func (c *Chip8) instruction(opcode uint16) {
 		c.stackPointer++
 		c.programCounter = opcode & 0x0fff
 	case 0x3000:
-		nn := op & 0x00ff
-		x := (op >> 8) & 0x0f
+		nn := opcode & 0x00ff
+		x := (opcode >> 8) & 0x0f
 
-		if register[x] == byte(nn) {
-			pc += 2
+		if c.v[x] == byte(nn) {
+			c.skip()
 		}
 
 	case 0x4000:
-		nn := op & 0x00ff
-		x := (op >> 8) & 0x0f
+		nn := opcode & 0x00ff
+		x := (opcode >> 8) & 0xf
 
-		if register[x] != byte(nn) {
-			pc += 2
+		if c.v[x] != byte(nn) {
+			c.skip()
 		}
 
 	case 0x5000:
-		x := (op >> 8) & 0x0f
-		y := (op >> 4) & 0x0f
-		if register[x] == register[y] {
-			pc += 2
+		x := (opcode >> 8) & 0xf
+		y := (opcode >> 4) & 0xf
+		if c.v[x] == c.v[y] {
+			c.skip()
 		}
 	case 0x6000:
-		x := (op >> 8) & 0x0f
-		nn := op & 0x00ff
-
-		register[x] = byte(nn)
+		x := (opcode >> 8) & 0x0f
+		nn := opcode & 0x00ff
+		c.v[x] = byte(nn)
 	case 0x7000:
-		x := (op >> 8) & 0x0f
-		nn := op & 0x00ff
+		x := (opcode >> 8) & 0x0f
+		nn := opcode & 0x00ff
 
-		register[x] += byte(nn)
+		c.v[x] += byte(nn)
 	case 0x8000:
-		last := op & 0x000f
-		x := (op >> 8) & 0x0f
-		y := (op >> 4) & 0x0f
+		last := opcode & 0x000f
+		x := (opcode >> 8) & 0x0f
+		y := (opcode >> 4) & 0x0f
 		switch last {
 		case 0:
-			register[x] = register[y]
+			c.v[x] = c.v[y]
 		case 1:
-			register[x] |= register[y]
+			c.v[x] |= c.v[y]
 		case 2:
-			register[x] &= register[y]
+			c.v[x] &= c.v[y]
 		case 3:
-			register[x] ^= register[y]
+			c.v[x] ^= c.v[y]
 		case 4:
-			tmp := uint16(register[x]) + uint16(register[y])
-			if tmp > math.MaxUint8 {
-				register[0xf] = 1
+			sum := uint16(c.v[x]) + uint16(c.v[y])
+			if sum > math.MaxUint8 {
+				c.v[0xf] = 1
 			} else {
-				register[0xf] = 0
+				c.v[0xf] = 0
 			}
-			register[x] = byte(tmp & 0xff)
+			c.v[x] = byte(sum & 0xff)
 		case 5:
-			// tmp := uint16(register[x]) + uint16(register[y])
-			if register[x] > register[y] {
-				register[0xf] = 1
+			if c.v[x] > c.v[y] {
+				c.v[0xf] = 1
 			} else {
-				register[0xf] = 0
+				c.v[0xf] = 0
 			}
-			register[x] -= register[y]
+			c.v[x] -= c.v[y]
 		case 6:
-			register[0xf] = register[x] & 0x0001
-			register[x] >>= 1
+			c.v[0xf] = c.v[x] & 0x1
+			c.v[x] >>= 1
 		case 7:
-			if register[y] > register[x] {
-				register[0xf] = 1
+			if c.v[y] > c.v[x] {
+				c.v[0xf] = 1
 			} else {
-				register[0xf] = 0
+				c.v[0xf] = 0
 			}
-			register[x] = register[y] - register[x]
+			c.v[x] = c.v[y] - c.v[x]
 		case 0xe:
-			register[0xf] = register[x] >> 7
-			register[x] <<= 1
+			c.v[0xf] = c.v[x] >> 7
+			c.v[x] <<= 1
 		default:
-			panic(fmt.Sprintf("%x", op))
+			panic(fmt.Errorf("uknown opcode %x", opcode))
 		}
 	case 0x9000:
-		x := (op >> 8) & 0x0f
-		y := (op >> 4) & 0x0f
-		if register[x] != register[y] {
-			pc += 2
+		x := (opcode >> 8) & 0xf
+		y := (opcode >> 4) & 0x0f
+		if c.v[x] != c.v[y] {
+			c.skip()
 		}
 	case 0xa000:
-		nnn := op & 0x0fff
-		idRegister = nnn
+		nnn := opcode & 0x0fff
+		c.vi = nnn
 	case 0xb000:
-		nnn := op & 0x0fff
-		pc = nnn + uint16(register[0])
+		nnn := opcode & 0x0fff
+		c.programCounter = nnn + uint16(c.v[0])
 	case 0xc000:
-		r := byte(random.Intn(256))
-		x := (op >> 8) & 0x0f
-		nn := byte(op & 0x00ff)
-		register[x] = r & nn
+		x := (opcode >> 8) & 0xf
+		nn := byte(opcode & 0x00ff)
+		c.v[x] = byte(c.random.Intn(math.MaxUint8)) & nn
 
 	case 0xd000:
-		n := byte(op & 0x0f)
-		x := (op >> 8) & 0x0f
-		y := (op >> 4) & 0x0f
-		draw(register[x], register[y], n)
-		// panic("need draw")
+		n := byte(opcode & 0x0f)
+		x := (opcode >> 8) & 0x0f
+		y := (opcode >> 4) & 0x0f
+		c.draw(c.v[x], c.v[y], n)
+
 	case 0xe000:
-		x := (op >> 8) & 0x0f
-		nn := op & 0xff
+		x := (opcode >> 8) & 0x0f
+		nn := opcode & 0xff
 		switch nn {
 		case 0x9e:
-			if key(register[x]) {
-				pc += 2
+			if c.keyPressed(c.v[x]) {
+				c.skip()
 			}
 		case 0xa1:
-			if !key(register[x]) {
-				pc += 2
+			if !c.keyPressed(c.v[x]) {
+				c.skip()
 			}
 		default:
-			panic(fmt.Sprintf("%x", op))
+			panic(fmt.Errorf("uknown opcode %x", opcode))
 		}
 	case 0xf000:
-		x := (op >> 8) & 0x0f
-		nn := op & 0xff
+		x := (opcode >> 8) & 0x0f
+		nn := opcode & 0xff
 
 		switch nn {
 		case 0x07:
-			register[x] = delayTimer
+			c.v[x] = c.delayTimer
 		case 0x0a:
-			register[x] = getKey()
+			c.v[x] = c.getKey()
 		case 0x15:
-			delayTimer = register[x]
-			// if delayTimer > 60 {
-			// 	delayTimer = 60
-			// }
+			c.delayTimer = c.v[x]
 		case 0x18:
-			soundTimer = register[x]
+			c.soundTimer = c.v[x]
 		case 0x1e:
-			idRegister += uint16(register[x])
+			c.vi += uint16(c.v[x])
 		case 0x29:
-			idRegister = spriteAddr(register[x])
+			c.vi = c.builtInSpriteAddr(c.v[x])
 		case 0x33:
-			v := register[x]
-			b, c, d := bcd(v)
-			memory[idRegister] = b
-			memory[idRegister] = c
-			memory[idRegister] = d
+			j, k, l := BCD(c.v[x])
+			c.writeMemory(c.vi, j)
+			c.writeMemory(c.vi, k)
+			c.writeMemory(c.vi, l)
 		case 0x55:
 			for i := uint16(0); i <= x; i++ {
-				memory[i+idRegister] = register[i]
+				c.writeMemory(i+c.vi, c.v[i])
 			}
 		case 0x65:
 			for i := uint16(0); i <= x; i++ {
-				register[i] = memory[i+idRegister]
+				c.v[i] = c.readMemory(i + c.vi)
 			}
 		default:
-			panic(fmt.Sprintf("%x", op))
+			panic(fmt.Sprintf("unknow opcode %x", opcode))
 		}
 	default:
-		panic(fmt.Sprintf("%x", op))
+		panic(fmt.Sprintf("unknow opcode %x", opcode))
 	}
-	delayTimer--
-	if delayTimer < 0 {
-		delayTimer = 60
-	}
-	if drawFlag {
-		display()
-		drawFlag = false
-	}
+}
+
+func (c *Chip8) keyPressed(key byte) bool {
+	c.keyMux.Lock()
+	defer c.keyMux.Unlock()
+
+	k := uint16(1 << key)
+	return c.KeyState&k == k
+}
+
+func (c *Chip8) getKey() byte {
+	panic("getKey needed")
+	return 0
+}
+
+func (c *Chip8) draw(x, y, n byte) {
+	panic("need draw")
+}
+
+func (c *Chip8) builtInSpriteAddr(n byte) uint16 {
+	return uint16(n) * 5
 }
 
 func (c *Chip8) skip() {
 	c.programCounter += 2
+}
+
+func (c *Chip8) writeMemory(addr uint16, value byte) {
+	c.memory[addr] = value
+}
+func (c *Chip8) readMemory(addr uint16) byte {
+	return c.memory[addr]
 }
