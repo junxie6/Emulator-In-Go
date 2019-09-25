@@ -2,9 +2,11 @@ package cpu
 
 import (
 	"fmt"
+	"io"
 	"math"
 	"math/rand"
 	"sync"
+	"time"
 )
 
 type Chip8 struct {
@@ -31,15 +33,57 @@ type Chip8 struct {
 	random *rand.Rand
 }
 
+func NewChip8(rom io.Reader, display Display) (c *Chip8) {
+	defer func() {
+		c.loadRom(rom)
+	}()
+	return &Chip8{
+		v:              make([]byte, registerSize),
+		programCounter: programCounterStartPoint,
+		memory:         make([]byte, memorySize),
+
+		stack:   make([]uint16, stackSize),
+		display: display,
+		screenBoard: func() [][]bool {
+			rtn := make([][]bool, ScreenW)
+			for i := range rtn {
+				rtn[i] = make([]bool, ScreenH)
+			}
+			return rtn
+		}(),
+
+		delayTimer: timer,
+		soundTimer: timer,
+
+		keySignal: sync.NewCond(&sync.Mutex{}),
+
+		random: rand.New(rand.NewSource(time.Now().Unix())),
+	}
+}
+
 func (c *Chip8) Run() {
 	for {
 		opcode := c.loadOpcode()
 		c.instruction(opcode)
 
-		c.delayTimer--
-		c.soundTimer--
-
+		c.timerUpdate()
 		c.show()
+	}
+}
+
+func (c *Chip8) loadRom(bf io.Reader) {
+	_, err := bf.Read(c.memory[programCounterStartPoint:])
+	must(err)
+}
+func (c *Chip8) timerUpdate() {
+	c.delayTimer--
+	c.soundTimer--
+
+	if c.delayTimer < 0 {
+		c.delayTimer = timer
+	}
+	if c.soundTimer < 0 {
+		c.soundTimer = timer
 	}
 }
 
@@ -299,5 +343,11 @@ func (c *Chip8) show() {
 	if c.drawFlag {
 		c.display.Update(c.screenBoard)
 		c.drawFlag = false
+	}
+}
+
+func must(err error) {
+	if err != nil {
+		panic(err)
 	}
 }
