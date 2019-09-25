@@ -88,12 +88,17 @@ func (r *Render) Update(board [][]bool) {
 	must(r.render.SetDrawColor(0xff, 0xff, 0xff, 0xff))
 	for x := range board {
 		for y, v := range board[x] {
+			rect := &sdl.Rect{
+				X: int32(x) * 8, Y: int32(y) * 8, W: 8, H: 8,
+			}
+
 			if v {
-				for i := 0; i < 8; i++ {
-					for j := 0; j < 8; j++ {
-						must(r.render.DrawPoint(int32(x*8+i), int32(y*8+j)))
-					}
-				}
+				// for i := 0; i < 8; i++ {
+				// 	for j := 0; j < 8; j++ {
+				// 		must(r.render.DrawPoint(int32(x*8+i), int32(y*8+j)))
+				// 	}
+				// }
+				must(r.render.DrawRect(rect))
 			}
 
 		}
