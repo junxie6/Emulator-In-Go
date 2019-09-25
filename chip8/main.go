@@ -91,14 +91,8 @@ func (r *Render) Update(board [][]bool) {
 			rect := &sdl.Rect{
 				X: int32(x) * 8, Y: int32(y) * 8, W: 8, H: 8,
 			}
-
 			if v {
-				// for i := 0; i < 8; i++ {
-				// 	for j := 0; j < 8; j++ {
-				// 		must(r.render.DrawPoint(int32(x*8+i), int32(y*8+j)))
-				// 	}
-				// }
-				must(r.render.DrawRect(rect))
+				must(r.render.FillRect(rect))
 			}
 
 		}
