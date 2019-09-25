@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/KeyOneLi/Emulator-In-Go/chip8/cpu"
@@ -51,8 +50,8 @@ func main() {
 				code := t.Keysym.Sym
 				press := t.State == 1
 				if v, ok := keyValue[code]; ok {
-					fmt.Printf("[%d ms] Keyboard\ttype:%d\tsym:%c\tmodifiers:%d\tstate:%d\trepeat:%d\n",
-						t.Timestamp, t.Type, t.Keysym.Sym, t.Keysym.Mod, t.State, t.Repeat)
+					// fmt.Printf("[%d ms] Keyboard\ttype:%d\tsym:%c\tmodifiers:%d\tstate:%d\trepeat:%d\n",
+					// 	t.Timestamp, t.Type, t.Keysym.Sym, t.Keysym.Mod, t.State, t.Repeat)
 					if press {
 						chip8.PressKey(v)
 					} else {
