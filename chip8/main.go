@@ -94,8 +94,8 @@ func (r *Render) Update(board [][]bool) {
 						must(r.render.DrawPoint(int32(x*8+i), int32(y*8+j)))
 					}
 				}
-
 			}
+
 		}
 	}
 	r.render.Present()

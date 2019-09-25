@@ -48,9 +48,9 @@ func NewChip8(rom io.Reader, display Display) (c *Chip8) {
 		stack:   make([]uint16, stackSize),
 		display: display,
 		screenBoard: func() [][]bool {
-			rtn := make([][]bool, ScreenW*8)
+			rtn := make([][]bool, ScreenW)
 			for i := range rtn {
-				rtn[i] = make([]bool, ScreenH*8)
+				rtn[i] = make([]bool, ScreenH)
 			}
 			return rtn
 		}(),
@@ -334,15 +334,20 @@ func (c *Chip8) draw(x, y, n byte) {
 	c.drawFlag = true
 
 	c.v[0xf] = 0
+
 	for i := byte(0); i < n; i++ {
 		px := c.readMemory(c.vi + uint16(i))
 		for j := byte(0); j < 8; j++ {
 			flag := (px>>uint(7-j))&0x1 == 1
-			pre := c.screenBoard[x+j][y+i]
+
+			X := (x + j) % ScreenW
+			Y := (y + i) % ScreenH
+
+			pre := c.screenBoard[X][Y]
 			if flag != pre {
-				c.screenBoard[x+j][y+i] = true
+				c.screenBoard[X][Y] = true
 			} else {
-				c.screenBoard[x+j][y+i] = false
+				c.screenBoard[X][Y] = false
 				if pre {
 					c.v[0xf] = 1
 				}
