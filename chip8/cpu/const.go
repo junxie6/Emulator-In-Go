@@ -8,6 +8,7 @@ const (
 	programCounterStartPoint = 0x200
 	stackSize                = 16
 	registerSize             = 16
+	timer                    = 60
 )
 
 const (
