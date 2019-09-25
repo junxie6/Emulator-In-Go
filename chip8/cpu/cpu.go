@@ -16,6 +16,7 @@ type Chip8 struct {
 	stack        []uint16
 	stackPointer byte
 
+	drawFlag    bool
 	display     Display
 	screenBoard [][]bool
 
@@ -39,9 +40,16 @@ func (c *Chip8) instruction(opcode uint16) {
 	switch opcode & 0xf000 {
 	case 0x0000:
 		if opcode == 0x00e0 {
+			c.screenBoard = make([][]bool, ScreenW)
+			for i := range c.screenBoard {
+				c.screenBoard[i] = make([]bool, ScreenH)
+			}
 			c.display.Clear()
 		} else if opcode == 0x00ee {
 			c.stackPointer--
+			if c.stackPointer < 0 {
+				panic("stack overflow")
+			}
 			c.programCounter = c.stack[c.stackPointer]
 		} else {
 			c.programCounter = opcode & 0x0fff
@@ -203,6 +211,24 @@ func (c *Chip8) instruction(opcode uint16) {
 	}
 }
 
+func (c *Chip8) PressKey(key byte) {
+	c.keyMux.Lock()
+	defer c.keyMux.Unlock()
+
+	c.keySignal.L.Lock()
+	c.KeyState &= 1 << key
+	c.lastPressedKey = key
+	c.keySignal.Signal()
+	c.keySignal.L.Unlock()
+}
+
+func (c *Chip8) ReleaseKey(key byte) {
+	c.keyMux.Lock()
+	defer c.keyMux.Unlock()
+
+	c.KeyState &= ^(1 << key)
+}
+
 func (c *Chip8) keyPressed(key byte) bool {
 	c.keyMux.Lock()
 	defer c.keyMux.Unlock()
@@ -212,12 +238,32 @@ func (c *Chip8) keyPressed(key byte) bool {
 }
 
 func (c *Chip8) getKey() byte {
-	panic("getKey needed")
-	return 0
+	c.keySignal.L.Lock()
+	c.keySignal.Wait()
+	c.keySignal.L.Unlock()
+
+	return c.lastPressedKey
 }
 
 func (c *Chip8) draw(x, y, n byte) {
-	panic("need draw")
+	c.drawFlag = true
+
+	c.v[0xf] = 0
+	for i := byte(0); i < n; i++ {
+		px := c.readMemory(c.vi + uint16(i))
+		for j := byte(0); j < 8; j++ {
+			flag := (px>>uint(7-j))&0x1 == 1
+			pre := c.screenBoard[x+j][y+i]
+			if flag != pre {
+				c.screenBoard[x+j][y+i] = true
+			} else {
+				c.screenBoard[x+j][y+i] = false
+				if pre {
+					c.v[0xf] = 1
+				}
+			}
+		}
+	}
 }
 
 func (c *Chip8) builtInSpriteAddr(n byte) uint16 {
