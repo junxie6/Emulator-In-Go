@@ -299,10 +299,7 @@ func (c *Chip8) instruction(opcode uint16) {
 func (c *Chip8) PressKey(key byte) {
 	c.keyMux.Lock()
 	defer c.keyMux.Unlock()
-	defer func() {
-		fmt.Println(c.KeyState)
 
-	}()
 	c.keySignal.L.Lock()
 	c.KeyState |= 1 << key
 	c.lastPressedKey = key
