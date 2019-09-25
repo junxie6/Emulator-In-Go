@@ -12,7 +12,7 @@ const (
 )
 
 const (
-	ScreenW = 512
+	ScreenW = 64
 	ScreenH = 32
 )
 
