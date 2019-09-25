@@ -10,6 +10,11 @@ const (
 	registerSize             = 16
 )
 
+const (
+	ScreenW = 512
+	ScreenH = 32
+)
+
 var fontset = []byte{
 	0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
 	0x20, 0x60, 0x20, 0x20, 0x70, // 1
