@@ -38,6 +38,7 @@ type Chip8 struct {
 func NewChip8(rom io.Reader, display Display) (c *Chip8) {
 	defer func() {
 		c.loadRom(rom)
+		c.loadFont()
 	}()
 	return &Chip8{
 		v:              make([]byte, registerSize),
@@ -47,9 +48,9 @@ func NewChip8(rom io.Reader, display Display) (c *Chip8) {
 		stack:   make([]uint16, stackSize),
 		display: display,
 		screenBoard: func() [][]bool {
-			rtn := make([][]bool, ScreenW)
+			rtn := make([][]bool, ScreenW*8)
 			for i := range rtn {
-				rtn[i] = make([]bool, ScreenH)
+				rtn[i] = make([]bool, ScreenH*8)
 			}
 			return rtn
 		}(),
@@ -58,6 +59,7 @@ func NewChip8(rom io.Reader, display Display) (c *Chip8) {
 		soundTimer: timer,
 
 		keySignal: sync.NewCond(&sync.Mutex{}),
+		keyMux:    &sync.Mutex{},
 
 		random: rand.New(rand.NewSource(time.Now().Unix())),
 		done:   make(chan interface{}),
@@ -65,16 +67,22 @@ func NewChip8(rom io.Reader, display Display) (c *Chip8) {
 }
 
 func (c *Chip8) Run() {
+	cycle := 60
 	for {
 		select {
 		case <-c.done:
 			return
-		default:
+		case <-time.After(time.Second / 1000):
 			opcode := c.loadOpcode()
 			c.instruction(opcode)
 
 			c.timerUpdate()
-			c.show()
+
+			cycle--
+			if cycle == 0 {
+				c.show()
+				cycle = 60
+			}
 		}
 
 	}
@@ -87,12 +95,18 @@ func (c *Chip8) loadRom(bf io.Reader) {
 	_, err := bf.Read(c.memory[programCounterStartPoint:])
 	must(err)
 }
+func (c *Chip8) loadFont() {
+	for i := range fontset {
+		c.memory[i] = fontset[i]
+	}
+}
 func (c *Chip8) timerUpdate() {
 	c.delayTimer--
 	c.soundTimer--
 
 	if c.delayTimer < 0 {
 		c.delayTimer = timer
+
 	}
 	if c.soundTimer < 0 {
 		c.soundTimer = timer
@@ -102,6 +116,7 @@ func (c *Chip8) timerUpdate() {
 func (c *Chip8) loadOpcode() uint16 {
 	hi := uint16(c.readMemory(c.programCounter)) << 8
 	low := uint16(c.readMemory(c.programCounter + 1))
+	c.skip()
 	return hi | low
 }
 
@@ -284,9 +299,12 @@ func (c *Chip8) instruction(opcode uint16) {
 func (c *Chip8) PressKey(key byte) {
 	c.keyMux.Lock()
 	defer c.keyMux.Unlock()
+	defer func() {
+		fmt.Println(c.KeyState)
 
+	}()
 	c.keySignal.L.Lock()
-	c.KeyState &= 1 << key
+	c.KeyState |= 1 << key
 	c.lastPressedKey = key
 	c.keySignal.Signal()
 	c.keySignal.L.Unlock()
@@ -304,7 +322,7 @@ func (c *Chip8) keyPressed(key byte) bool {
 	defer c.keyMux.Unlock()
 
 	k := uint16(1 << key)
-	return c.KeyState&k == k
+	return c.KeyState&k != 0
 }
 
 func (c *Chip8) getKey() byte {
