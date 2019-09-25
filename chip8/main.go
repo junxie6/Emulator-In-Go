@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/KeyOneLi/Emulator-In-Go/chip8/cpu"
@@ -36,7 +37,7 @@ func main() {
 		cpu.ScreenW*8, cpu.ScreenH*8, sdl.WINDOW_SHOWN)
 	r, _ := sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
 
-	chip8 := cpu.NewChip8(file, &render{r})
+	chip8 := cpu.NewChip8(file, &Render{r})
 	file.Close()
 	window.UpdateSurface()
 
@@ -47,10 +48,11 @@ func main() {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch t := event.(type) {
 			case *sdl.KeyboardEvent:
-
 				code := t.Keysym.Sym
 				press := t.State == 1
 				if v, ok := keyValue[code]; ok {
+					fmt.Printf("[%d ms] Keyboard\ttype:%d\tsym:%c\tmodifiers:%d\tstate:%d\trepeat:%d\n",
+						t.Timestamp, t.Type, t.Keysym.Sym, t.Keysym.Mod, t.State, t.Repeat)
 					if press {
 						chip8.PressKey(v)
 					} else {
@@ -72,28 +74,28 @@ func must(err error) {
 	}
 }
 
-type render struct {
+type Render struct {
 	render *sdl.Renderer
 }
 
-func (r *render) Clear() {
-	must(r.render.SetDrawColor(0, 0, 0, 0xf))
+func (r *Render) Clear() {
+	must(r.render.SetDrawColor(0, 0, 0, 0xff))
 	r.render.Clear()
 }
 
-func (r *render) Update(board [][]bool) {
+func (r *Render) Update(board [][]bool) {
+	// fmt.Println("draw")
 	r.Clear()
-	must(r.render.SetDrawColor(0xf, 0xf, 0xf, 0xf))
-	for i := range board {
-		for j, v := range board[i] {
+	must(r.render.SetDrawColor(0xff, 0xff, 0xff, 0xff))
+	for x := range board {
+		for y, v := range board[x] {
 			if v {
-				rect := &sdl.Rect{
-					X: int32(i * 8),
-					Y: int32(j * 8),
-					W: 8,
-					H: 8,
+				for i := 0; i < 8; i++ {
+					for j := 0; j < 8; j++ {
+						must(r.render.DrawPoint(int32(x*8+i), int32(y*8+j)))
+					}
 				}
-				must(r.render.DrawRect(rect))
+
 			}
 		}
 	}
