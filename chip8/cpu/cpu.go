@@ -32,7 +32,21 @@ type Chip8 struct {
 }
 
 func (c *Chip8) Run() {
+	for {
+		opcode := c.loadOpcode()
+		c.instruction(opcode)
 
+		c.delayTimer--
+		c.soundTimer--
+
+		c.show()
+	}
+}
+
+func (c *Chip8) loadOpcode() uint16 {
+	hi := uint16(c.readMemory(c.programCounter)) << 8
+	low := uint16(c.readMemory(c.programCounter + 1))
+	return hi | low
 }
 
 func (c *Chip8) instruction(opcode uint16) {
@@ -279,4 +293,11 @@ func (c *Chip8) writeMemory(addr uint16, value byte) {
 }
 func (c *Chip8) readMemory(addr uint16) byte {
 	return c.memory[addr]
+}
+
+func (c *Chip8) show() {
+	if c.drawFlag {
+		c.display.Update(c.screenBoard)
+		c.drawFlag = false
+	}
 }
