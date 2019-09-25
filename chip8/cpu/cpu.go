@@ -31,6 +31,8 @@ type Chip8 struct {
 	soundTimer byte
 
 	random *rand.Rand
+
+	done chan interface{}
 }
 
 func NewChip8(rom io.Reader, display Display) (c *Chip8) {
@@ -58,17 +60,27 @@ func NewChip8(rom io.Reader, display Display) (c *Chip8) {
 		keySignal: sync.NewCond(&sync.Mutex{}),
 
 		random: rand.New(rand.NewSource(time.Now().Unix())),
+		done:   make(chan interface{}),
 	}
 }
 
 func (c *Chip8) Run() {
 	for {
-		opcode := c.loadOpcode()
-		c.instruction(opcode)
+		select {
+		case <-c.done:
+			return
+		default:
+			opcode := c.loadOpcode()
+			c.instruction(opcode)
 
-		c.timerUpdate()
-		c.show()
+			c.timerUpdate()
+			c.show()
+		}
+
 	}
+}
+func (c *Chip8) Close() {
+	close(c.done)
 }
 
 func (c *Chip8) loadRom(bf io.Reader) {
