@@ -17,7 +17,13 @@ const (
 	H
 	L
 	HL
+
+	//use to distinguish opcode params
+	_
+	N  //8bits load
+	NN //16bits load
 	Split
+
 	SP
 	PC
 )
