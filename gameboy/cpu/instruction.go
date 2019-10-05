@@ -428,6 +428,40 @@ var mapSRL = map[uint16]paramWraper{
 	0xcb3e: paramWraper{[]registerID{HL}, 16},
 }
 
+// bit opcodes
+var mapBITbr = map[uint16]paramWraper{
+	0xcb47: paramWraper{[]registerID{A}, 8},
+	0xcb40: paramWraper{[]registerID{B}, 8},
+	0xcb41: paramWraper{[]registerID{C}, 8},
+	0xcb42: paramWraper{[]registerID{D}, 8},
+	0xcb43: paramWraper{[]registerID{E}, 8},
+	0xcb44: paramWraper{[]registerID{H}, 8},
+	0xcb45: paramWraper{[]registerID{L}, 8},
+	0xcb46: paramWraper{[]registerID{HL}, 16},
+}
+
+var mapSETbr = map[uint16]paramWraper{
+	0xcbc7: paramWraper{[]registerID{A}, 8},
+	0xcbc0: paramWraper{[]registerID{B}, 8},
+	0xcbc1: paramWraper{[]registerID{C}, 8},
+	0xcbc2: paramWraper{[]registerID{D}, 8},
+	0xcbc3: paramWraper{[]registerID{E}, 8},
+	0xcbc4: paramWraper{[]registerID{H}, 8},
+	0xcbc5: paramWraper{[]registerID{L}, 8},
+	0xcbc6: paramWraper{[]registerID{HL}, 16},
+}
+
+var mapRESbr = map[uint16]paramWraper{
+	0xcb87: paramWraper{[]registerID{A}, 8},
+	0xcb80: paramWraper{[]registerID{B}, 8},
+	0xcb81: paramWraper{[]registerID{C}, 8},
+	0xcb82: paramWraper{[]registerID{D}, 8},
+	0xcb83: paramWraper{[]registerID{E}, 8},
+	0xcb84: paramWraper{[]registerID{H}, 8},
+	0xcb85: paramWraper{[]registerID{L}, 8},
+	0xcb86: paramWraper{[]registerID{HL}, 16},
+}
+
 // LD B,n  06 8
 func (gb *GBCpu) instruction(opcode byte) (cycle int) {
 
