@@ -6,22 +6,22 @@ import (
 
 // GBCpu gameboy cpu instance
 type GBCpu struct {
-	memory    []byte
-	registers map[registerID]*Register
+	memory    Memory
+	registers *RegisterPool
 	flag      byte
 }
 
 func NewGBCpu() *GBCpu {
 	return &GBCpu{
-		memory:    make([]byte, MemorySize),
-		registers: preloadRegister(),
+		// memory:    make([]byte, MemorySize),
+		registers: NewRegisterPool(),
 	}
 }
 
 func (gb *GBCpu) load8bits() byte {
 	defer gb.increasePC()
-	pc := gb.registers[PC]
-	return gb.memory[pc.Read()]
+	pc := gb.registers.Get(PC)
+	return gb.memory.ReadAt(pc.Read())
 }
 
 func (gb *GBCpu) load16bits() uint16 {
@@ -32,6 +32,6 @@ func (gb *GBCpu) load16bits() uint16 {
 }
 
 func (gb *GBCpu) increasePC() {
-	pc := gb.registers[PC]
+	pc := gb.registers.Get(PC)
 	pc.Write(pc.Read() + 1)
 }

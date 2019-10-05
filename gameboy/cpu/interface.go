@@ -7,3 +7,8 @@ type CPU interface {
 	LoadOpcode() byte
 	ExcInstrution()
 }
+
+type Memory interface {
+	ReadAt(addr uint16) byte
+	WriteAt(addr uint16, value byte)
+}
