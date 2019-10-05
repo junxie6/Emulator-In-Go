@@ -9,7 +9,7 @@ type paramWraper struct {
 	cycles int
 }
 
-var map8bitsLDr1r2 = map[byte]paramWraper{
+var map8bitsLD = map[byte]paramWraper{
 	0x06: paramWraper{[]registerID{B, N}, 8},
 	0x0E: paramWraper{[]registerID{C, N}, 8},
 	0x16: paramWraper{[]registerID{D, N}, 8},
@@ -99,19 +99,107 @@ var map8bitsLDr1r2 = map[byte]paramWraper{
 	0xea: paramWraper{[]registerID{NN, A}, 16},
 }
 
-var map8bitLDAorC = map[byte]paramWraper{
+var map8bitsLDD = map[byte]paramWraper{
+	0x3a: paramWraper{[]registerID{A, HL}, 8},
+	0x32: paramWraper{[]registerID{HL, A}, 8},
+}
+
+var map8bitsLDI = map[byte]paramWraper{
+	0x2a: paramWraper{[]registerID{A, HL}, 8},
+	0x22: paramWraper{[]registerID{HL, A}, 8},
+}
+
+var map8bitsLDH = map[byte]paramWraper{
+	0xe0: paramWraper{[]registerID{N, A}, 12},
+	0xf0: paramWraper{[]registerID{A, N}, 12},
+}
+var map8bitLDAC = map[byte]paramWraper{
 	0xf2: paramWraper{[]registerID{A, C}, 8},
 	0xe2: paramWraper{[]registerID{C, A}, 8},
+}
+var map16bitsLD = map[byte]paramWraper{
+	0x01: paramWraper{[]registerID{BC, NN}, 12},
+	0x11: paramWraper{[]registerID{DE, NN}, 12},
+	0x21: paramWraper{[]registerID{HL, NN}, 12},
+	0x31: paramWraper{[]registerID{HL, NN}, 12},
+
+	0xf9: paramWraper{[]registerID{SP, HL}, 8},
+	0xf8: paramWraper{[]registerID{SP, N}, 12},
+
+	0x08: paramWraper{[]registerID{NN, SP}, 20},
+}
+
+var mapPUSH = map[byte]paramWraper{
+	0xf5: paramWraper{[]registerID{AF}, 16},
+	0xc5: paramWraper{[]registerID{BC}, 16},
+	0xd5: paramWraper{[]registerID{DE}, 16},
+	0xe5: paramWraper{[]registerID{HL}, 16},
+}
+
+var mapPOP = map[byte]paramWraper{
+	0xf1: paramWraper{[]registerID{AF}, 12},
+	0xc1: paramWraper{[]registerID{BC}, 12},
+	0xd1: paramWraper{[]registerID{DE}, 12},
+	0xe1: paramWraper{[]registerID{HL}, 12},
+}
+
+// 8bit ALU
+var map8bitADD = map[byte]paramWraper{
+	0x87: paramWraper{[]registerID{A, A}, 4},
+	0x80: paramWraper{[]registerID{A, B}, 4},
+	0x81: paramWraper{[]registerID{A, C}, 4},
+	0x82: paramWraper{[]registerID{A, D}, 4},
+	0x83: paramWraper{[]registerID{A, E}, 4},
+	0x84: paramWraper{[]registerID{A, H}, 4},
+	0x85: paramWraper{[]registerID{A, L}, 4},
+	0x86: paramWraper{[]registerID{A, HL}, 4},
+	0xc6: paramWraper{[]registerID{A, N}, 8},
+}
+
+var map8bitADC = map[byte]paramWraper{
+	0x8f: paramWraper{[]registerID{A, A}, 4},
+	0x88: paramWraper{[]registerID{A, B}, 4},
+	0x89: paramWraper{[]registerID{A, C}, 4},
+	0x8a: paramWraper{[]registerID{A, D}, 4},
+	0x8b: paramWraper{[]registerID{A, E}, 4},
+	0x8c: paramWraper{[]registerID{A, F}, 4},
+	0x8d: paramWraper{[]registerID{A, H}, 4},
+	0x8e: paramWraper{[]registerID{A, L}, 8},
+	0xce: paramWraper{[]registerID{A, HL}, 8},
+}
+
+var map8bitSUB = map[byte]paramWraper{
+	0x97: paramWraper{[]registerID{A}, 4},
+	0x90: paramWraper{[]registerID{B}, 4},
+	0x91: paramWraper{[]registerID{C}, 4},
+	0x92: paramWraper{[]registerID{D}, 4},
+	0x93: paramWraper{[]registerID{E}, 4},
+	0x94: paramWraper{[]registerID{H}, 4},
+	0x95: paramWraper{[]registerID{L}, 4},
+	0x96: paramWraper{[]registerID{HL}, 8},
+	0xd6: paramWraper{[]registerID{N}, 8},
+}
+
+var map8bitSBC = map[byte]paramWraper{
+	0x9f: paramWraper{[]registerID{A, A}, 4},
+	0x98: paramWraper{[]registerID{A, B}, 4},
+	0x99: paramWraper{[]registerID{A, B}, 4},
+	0x9a: paramWraper{[]registerID{A, B}, 4},
+	0x9b: paramWraper{[]registerID{A, B}, 4},
+	0x9c: paramWraper{[]registerID{A, B}, 4},
+	0x9d: paramWraper{[]registerID{A, B}, 4},
+	0x9e: paramWraper{[]registerID{A, B}, 8},
+	// 0x??: paramWraper{[]registerID{?, ?}, ?}, ????????
 }
 
 // LD B,n  06 8
 func (gb *GBCpu) instruction(opcode byte) (cycle int) {
 
-	if v, ok := map8bitsLDr1r2[opcode]; ok {
+	if v, ok := map8bitsLD[opcode]; ok {
 		return gb._8bitsLDr1r2(v)
 	}
 
-	if v, ok := map8bitLDAorC[opcode]; ok {
+	if v, ok := map8bitLDAC[opcode]; ok {
 		return gb._8bitsLDAorC(v)
 	}
 	panic(fmt.Errorf("unknown opcode %x", opcode))
