@@ -192,6 +192,100 @@ var map8bitSBC = map[byte]paramWraper{
 	// 0x??: paramWraper{[]registerID{?, ?}, ?}, ????????
 }
 
+var map8bitAND = map[byte]paramWraper{
+	0xa7: paramWraper{[]registerID{A}, 4},
+	0xa0: paramWraper{[]registerID{B}, 4},
+	0xa1: paramWraper{[]registerID{C}, 4},
+	0xa2: paramWraper{[]registerID{D}, 4},
+	0xa3: paramWraper{[]registerID{E}, 4},
+	0xa4: paramWraper{[]registerID{H}, 4},
+	0xa5: paramWraper{[]registerID{L}, 4},
+	0xa6: paramWraper{[]registerID{HL}, 8},
+	0xe6: paramWraper{[]registerID{N}, 8},
+}
+
+var map8bitOR = map[byte]paramWraper{
+	0xb7: paramWraper{[]registerID{A}, 4},
+	0xb0: paramWraper{[]registerID{B}, 4},
+	0xb1: paramWraper{[]registerID{C}, 4},
+	0xb2: paramWraper{[]registerID{D}, 4},
+	0xb3: paramWraper{[]registerID{E}, 4},
+	0xb4: paramWraper{[]registerID{H}, 4},
+	0xb5: paramWraper{[]registerID{L}, 4},
+	0xb6: paramWraper{[]registerID{HL}, 8},
+	0xf6: paramWraper{[]registerID{N}, 8},
+}
+
+var map8bitXOR = map[byte]paramWraper{
+	0xaf: paramWraper{[]registerID{A}, 4},
+	0xa8: paramWraper{[]registerID{B}, 4},
+	0xa9: paramWraper{[]registerID{C}, 4},
+	0xaa: paramWraper{[]registerID{D}, 4},
+	0xab: paramWraper{[]registerID{E}, 4},
+	0xac: paramWraper{[]registerID{H}, 4},
+	0xad: paramWraper{[]registerID{L}, 4},
+	0xae: paramWraper{[]registerID{HL}, 8},
+	0xee: paramWraper{[]registerID{N}, 8},
+}
+
+var map8bitCP = map[byte]paramWraper{
+	0xbf: paramWraper{[]registerID{A}, 4},
+	0xb8: paramWraper{[]registerID{B}, 4},
+	0xb9: paramWraper{[]registerID{C}, 4},
+	0xba: paramWraper{[]registerID{D}, 4},
+	0xbb: paramWraper{[]registerID{E}, 4},
+	0xbc: paramWraper{[]registerID{H}, 4},
+	0xbd: paramWraper{[]registerID{L}, 4},
+	0xbe: paramWraper{[]registerID{HL}, 8},
+	0xfe: paramWraper{[]registerID{N}, 8},
+}
+
+var map8bitINC = map[byte]paramWraper{
+	0x3c: paramWraper{[]registerID{A}, 4},
+	0x04: paramWraper{[]registerID{B}, 4},
+	0x0c: paramWraper{[]registerID{C}, 4},
+	0x14: paramWraper{[]registerID{D}, 4},
+	0x1c: paramWraper{[]registerID{E}, 4},
+	0x24: paramWraper{[]registerID{H}, 4},
+	0x2c: paramWraper{[]registerID{L}, 4},
+	0x34: paramWraper{[]registerID{HL}, 12},
+}
+
+var map8bitDEC = map[byte]paramWraper{
+	0x3d: paramWraper{[]registerID{A}, 4},
+	0x05: paramWraper{[]registerID{B}, 4},
+	0x0d: paramWraper{[]registerID{C}, 4},
+	0x15: paramWraper{[]registerID{D}, 4},
+	0x1d: paramWraper{[]registerID{E}, 4},
+	0x25: paramWraper{[]registerID{H}, 4},
+	0x2d: paramWraper{[]registerID{L}, 4},
+	0x35: paramWraper{[]registerID{HL}, 4},
+}
+
+// 16-bit Arithmetic
+var map16bitADD = map[byte]paramWraper{
+	0x09: paramWraper{[]registerID{HL, BC}, 4},
+	0x19: paramWraper{[]registerID{HL, DE}, 4},
+	0x29: paramWraper{[]registerID{HL, HL}, 4},
+	0x39: paramWraper{[]registerID{HL, SP}, 4},
+
+	0xe8: paramWraper{[]registerID{SP, N}, 16},
+}
+
+var map16bitINC = map[byte]paramWraper{
+	0x03: paramWraper{[]registerID{BC}, 8},
+	0x13: paramWraper{[]registerID{DE}, 8},
+	0x23: paramWraper{[]registerID{HL}, 8},
+	0x33: paramWraper{[]registerID{SP}, 8},
+}
+
+var map16bitDEC = map[byte]paramWraper{
+	0x0b: paramWraper{[]registerID{BC}, 8},
+	0x1b: paramWraper{[]registerID{DE}, 8},
+	0x2b: paramWraper{[]registerID{HL}, 8},
+	0x3b: paramWraper{[]registerID{SP}, 8},
+}
+
 // LD B,n  06 8
 func (gb *GBCpu) instruction(opcode byte) (cycle int) {
 
