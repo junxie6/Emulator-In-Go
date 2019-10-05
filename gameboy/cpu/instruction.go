@@ -462,6 +462,33 @@ var mapRESbr = map[uint16]paramWraper{
 	0xcb86: paramWraper{[]registerID{HL}, 16},
 }
 
+// Jumps
+var mapJPnn = map[byte]paramWraper{
+	0xC3: paramWraper{[]registerID{NN}, 12},
+}
+
+var mapJPccnn = map[byte]paramWraper{
+	0xc2: paramWraper{[]registerID{NN}, 12},
+	0xca: paramWraper{[]registerID{NN}, 12},
+	0xd2: paramWraper{[]registerID{NN}, 12},
+	0xda: paramWraper{[]registerID{NN}, 12},
+}
+
+var mapJPHL = map[byte]paramWraper{
+	0xe9: paramWraper{[]registerID{HL}, 4},
+}
+
+var mapJRn = map[byte]paramWraper{
+	0x18: paramWraper{[]registerID{N}, 8},
+}
+
+var mapJRccn = map[byte]paramWraper{
+	0x20: paramWraper{[]registerID{N}, 8},
+	0x28: paramWraper{[]registerID{N}, 8},
+	0x30: paramWraper{[]registerID{N}, 8},
+	0x38: paramWraper{[]registerID{N}, 8},
+}
+
 // LD B,n  06 8
 func (gb *GBCpu) instruction(opcode byte) (cycle int) {
 
