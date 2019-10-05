@@ -62,3 +62,13 @@ func ParseRawInstructionMap(list map[string]map[byte]paramWraper) []*Instruction
 	}
 	return rtn
 }
+
+func atoi(s string) registerID {
+	mapRegName := map[string]registerID{
+		"A": A, "B": B, "C": C, "D": D,
+		"E": E, "F": F, "AF": AF, "BC": BC,
+		"DE": DE, "H": H, "L": L, "HL": HL,
+		"NN": NN, "N": N, "SP": SP, "PC": PC,
+	}
+	return mapRegName[s]
+}
