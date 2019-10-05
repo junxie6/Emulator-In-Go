@@ -24,6 +24,12 @@ type RegisterPool struct {
 	list map[registerID]*Register16bit
 }
 
+func NewRegisterPool() *RegisterPool {
+	return &RegisterPool{
+		list: preloadRegister(),
+	}
+}
+
 func (p *RegisterPool) Get(id registerID) Register {
 	// var id registerID
 	var _id registerID
@@ -40,7 +46,7 @@ func (p *RegisterPool) Get(id registerID) Register {
 		panic(fmt.Sprintf("unknow id %d", id))
 	}
 
-	target := p.list[id]
+	target := p.list[_id]
 
 	switch id {
 	case AF, BC, DE, HL, SP, PC:
@@ -63,8 +69,8 @@ func (p *RegisterPool) Get(id registerID) Register {
 //Register16bit define 16bit register
 type Register16bit uint16
 
-func preloadRegister() map[registerID]Register {
-	return map[registerID]Register{
+func preloadRegister() map[registerID]*Register16bit {
+	return map[registerID]*Register16bit{
 		AF: new(Register16bit),
 		BC: new(Register16bit),
 		DE: new(Register16bit),
