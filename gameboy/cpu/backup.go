@@ -1,5 +1,10 @@
 package cpu
 
+type paramWraper struct {
+	params []registerID
+	cycles int
+}
+
 var map8bitsLD = map[byte]paramWraper{
 	0x06: paramWraper{[]registerID{B, N}, 8},
 	0x0E: paramWraper{[]registerID{C, N}, 8},
