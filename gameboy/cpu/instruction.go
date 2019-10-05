@@ -489,6 +489,44 @@ var mapJRccn = map[byte]paramWraper{
 	0x38: paramWraper{[]registerID{N}, 8},
 }
 
+// Calls
+var mapCallsnn = map[byte]paramWraper{
+	0xcd: paramWraper{[]registerID{NN}, 12},
+}
+
+var mapCallsccnn = map[byte]paramWraper{
+	0xc4: paramWraper{[]registerID{NN}, 12},
+	0xcc: paramWraper{[]registerID{NN}, 12},
+	0xd4: paramWraper{[]registerID{NN}, 12},
+	0xdc: paramWraper{[]registerID{NN}, 12},
+}
+
+// Restarts
+var mapRST = map[byte]paramWraper{
+	0xc7: paramWraper{[]registerID{}, 32},
+	0xcf: paramWraper{[]registerID{}, 32},
+	0xd7: paramWraper{[]registerID{}, 32},
+	0xdf: paramWraper{[]registerID{}, 32},
+	0xe7: paramWraper{[]registerID{}, 32},
+	0xef: paramWraper{[]registerID{}, 32},
+	0xf7: paramWraper{[]registerID{}, 32},
+	0xff: paramWraper{[]registerID{}, 32},
+}
+
+// Returns
+var mapRET = map[byte]paramWraper{
+	0xc9: paramWraper{[]registerID{}, 8},
+
+	0xc0: paramWraper{[]registerID{}, 8},
+	0xc8: paramWraper{[]registerID{}, 8},
+	0xd0: paramWraper{[]registerID{}, 8},
+	0xd8: paramWraper{[]registerID{}, 8},
+}
+
+var mapRETI = map[byte]paramWraper{
+	0xd9: paramWraper{[]registerID{}, 8},
+}
+
 // LD B,n  06 8
 func (gb *GBCpu) instruction(opcode byte) (cycle int) {
 
