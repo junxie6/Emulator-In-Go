@@ -286,6 +286,148 @@ var map16bitDEC = map[byte]paramWraper{
 	0x3b: paramWraper{[]registerID{SP}, 8},
 }
 
+// Miscellaneous
+var mapSWAP = map[uint16]paramWraper{
+	0xcb37: paramWraper{[]registerID{A}, 8},
+	0xcb30: paramWraper{[]registerID{B}, 8},
+	0xcb31: paramWraper{[]registerID{C}, 8},
+	0xcb32: paramWraper{[]registerID{D}, 8},
+	0xcb33: paramWraper{[]registerID{E}, 8},
+	0xcb34: paramWraper{[]registerID{H}, 8},
+	0xcb35: paramWraper{[]registerID{L}, 8},
+	0xcb36: paramWraper{[]registerID{HL}, 16},
+}
+
+var mapDAA = map[byte]paramWraper{
+	0x27: paramWraper{[]registerID{}, 4},
+}
+
+var mapCPL = map[byte]paramWraper{
+	0x2f: paramWraper{[]registerID{}, 4},
+}
+
+var mapCCF = map[byte]paramWraper{
+	0x3f: paramWraper{[]registerID{}, 4},
+}
+
+var mapSCF = map[byte]paramWraper{
+	0x37: paramWraper{[]registerID{}, 4},
+}
+
+var mapNOP = map[byte]paramWraper{
+	0x00: paramWraper{[]registerID{}, 4},
+}
+
+var mapHALT = map[byte]paramWraper{
+	0x76: paramWraper{[]registerID{}, 4},
+}
+
+var mapSTOP = map[uint16]paramWraper{
+	0x1000: paramWraper{[]registerID{}, 4},
+}
+
+var mapDI = map[byte]paramWraper{
+	0xf3: paramWraper{[]registerID{}, 4},
+}
+
+var mapEI = map[byte]paramWraper{
+	0xfb: paramWraper{[]registerID{}, 4},
+}
+
+// Rotates & Shifts
+var mapRLCA = map[byte]paramWraper{
+	0x07: paramWraper{[]registerID{}, 4},
+}
+
+var mapRLA = map[byte]paramWraper{
+	0x17: paramWraper{[]registerID{}, 4},
+}
+
+var mapRRCA = map[byte]paramWraper{
+	0x0f: paramWraper{[]registerID{}, 4},
+}
+
+var mapRRA = map[byte]paramWraper{
+	0x1f: paramWraper{[]registerID{}, 4},
+}
+
+var mapRLC = map[uint16]paramWraper{
+	0xcb07: paramWraper{[]registerID{A}, 8},
+	0xcb00: paramWraper{[]registerID{B}, 8},
+	0xcb01: paramWraper{[]registerID{C}, 8},
+	0xcb02: paramWraper{[]registerID{D}, 8},
+	0xcb03: paramWraper{[]registerID{E}, 8},
+	0xcb04: paramWraper{[]registerID{H}, 8},
+	0xcb05: paramWraper{[]registerID{L}, 8},
+	0xcb06: paramWraper{[]registerID{HL}, 16},
+}
+
+var mapRL = map[uint16]paramWraper{
+	0xcb17: paramWraper{[]registerID{A}, 8},
+	0xcb10: paramWraper{[]registerID{B}, 8},
+	0xcb11: paramWraper{[]registerID{C}, 8},
+	0xcb12: paramWraper{[]registerID{D}, 8},
+	0xcb13: paramWraper{[]registerID{E}, 8},
+	0xcb14: paramWraper{[]registerID{H}, 8},
+	0xcb15: paramWraper{[]registerID{L}, 8},
+	0xcb16: paramWraper{[]registerID{HL}, 16},
+}
+
+var mapRRC = map[uint16]paramWraper{
+	0xcb0f: paramWraper{[]registerID{A}, 8},
+	0xcb08: paramWraper{[]registerID{B}, 8},
+	0xcb09: paramWraper{[]registerID{C}, 8},
+	0xcb0a: paramWraper{[]registerID{D}, 8},
+	0xcb0b: paramWraper{[]registerID{E}, 8},
+	0xcb0c: paramWraper{[]registerID{H}, 8},
+	0xcb0d: paramWraper{[]registerID{L}, 8},
+	0xcb0e: paramWraper{[]registerID{HL}, 16},
+}
+
+var mapRR = map[uint16]paramWraper{
+	0xcb1f: paramWraper{[]registerID{A}, 8},
+	0xcb18: paramWraper{[]registerID{B}, 8},
+	0xcb19: paramWraper{[]registerID{C}, 8},
+	0xcb1a: paramWraper{[]registerID{D}, 8},
+	0xcb1b: paramWraper{[]registerID{E}, 8},
+	0xcb1c: paramWraper{[]registerID{H}, 8},
+	0xcb1d: paramWraper{[]registerID{L}, 8},
+	0xcb1e: paramWraper{[]registerID{HL}, 16},
+}
+
+var mapSLA = map[uint16]paramWraper{
+	0xcb27: paramWraper{[]registerID{A}, 8},
+	0xcb20: paramWraper{[]registerID{B}, 8},
+	0xcb21: paramWraper{[]registerID{C}, 8},
+	0xcb22: paramWraper{[]registerID{D}, 8},
+	0xcb23: paramWraper{[]registerID{E}, 8},
+	0xcb24: paramWraper{[]registerID{H}, 8},
+	0xcb25: paramWraper{[]registerID{L}, 8},
+	0xcb26: paramWraper{[]registerID{HL}, 16},
+}
+
+var mapSRA = map[uint16]paramWraper{
+	0xcb2f: paramWraper{[]registerID{A}, 8},
+	0xcb28: paramWraper{[]registerID{B}, 8},
+	0xcb29: paramWraper{[]registerID{C}, 8},
+	0xcb2a: paramWraper{[]registerID{D}, 8},
+	0xcb2b: paramWraper{[]registerID{E}, 8},
+	0xcb2c: paramWraper{[]registerID{H}, 8},
+	0xcb2d: paramWraper{[]registerID{L}, 8},
+	0xcb2e: paramWraper{[]registerID{HL}, 16},
+}
+
+var mapSRL = map[uint16]paramWraper{
+	0xcb3f: paramWraper{[]registerID{A}, 8},
+	0xcb38: paramWraper{[]registerID{B}, 8},
+	0xcb39: paramWraper{[]registerID{C}, 8},
+	0xcb3a: paramWraper{[]registerID{D}, 8},
+	0xcb3b: paramWraper{[]registerID{E}, 8},
+	0xcb3c: paramWraper{[]registerID{H}, 8},
+	0xcb3d: paramWraper{[]registerID{L}, 8},
+	0xcb3e: paramWraper{[]registerID{HL}, 16},
+}
+
 // LD B,n  06 8
 func (gb *GBCpu) instruction(opcode byte) (cycle int) {
 
