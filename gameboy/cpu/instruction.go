@@ -60,12 +60,12 @@ func (gb *GBCpu) ld(opcode byte, params []registerID) {
 			a := gb.registers.Get(SP).Read()
 			b := uint16(-n)
 			value = a - b
-			flagHalfCarry, flagCarry = util.HalfCarryForSub(a, b), util.CarryForSub(a, b)
+			flagHalfCarry, flagCarry = util.HalfBorrow(a, b), util.Borrow(a, b)
 		} else {
 			a := gb.registers.Get(SP).Read()
 			b := uint16(n)
 			value = a + b
-			flagHalfCarry, flagCarry = util.HalfCarryForAdd(a, b), util.CarryForAdd(a, b)
+			flagHalfCarry, flagCarry = util.HalfCarry(a, b), util.Carry(a, b)
 		}
 
 		if flagCarry {
@@ -165,13 +165,13 @@ func (gb *GBCpu) add(opcode byte, params []registerID) {
 		gb.registers.ResetFlag(flagZ)
 	}
 
-	if util.HalfCarryForAdd(a, b) {
+	if util.HalfCarry(a, b) {
 		gb.registers.SetFlag(flagH)
 	} else {
 		gb.registers.ResetFlag(flagH)
 	}
 
-	if util.CarryForAdd(a, b) {
+	if util.Carry(a, b) {
 		gb.registers.SetFlag(flagH)
 	} else {
 		gb.registers.ResetFlag(flagH)
@@ -197,13 +197,51 @@ func (gb *GBCpu) adc(opcode byte, params []registerID) {
 		gb.registers.ResetFlag(flagZ)
 	}
 
-	if util.HalfCarryForAdd(a, n) || util.HalfCarryForAdd(a+n, carry) {
+	if util.HalfCarry(a, n) || util.HalfCarry(a+n, carry) {
 		gb.registers.SetFlag(flagH)
 	} else {
 		gb.registers.ResetFlag(flagH)
 	}
 
-	if util.CarryForAdd(a, n) || util.CarryForAdd(a+n, carry) {
+	if util.Carry(a, n) || util.Carry(a+n, carry) {
+		gb.registers.SetFlag(flagC)
+	} else {
+		gb.registers.ResetFlag(flagC)
+	}
+}
+
+func (gb *GBCpu) sub(opcode byte, params []registerID) {
+	var a, b uint16
+
+	a = gb.registers.Get(A).Read()
+	switch params[1] {
+	case N:
+		b = uint16(gb.load8bits())
+	case NN:
+		//invalid?
+		panic("invalid")
+	default:
+		b = gb.registers.Get(params[1]).Read()
+	}
+
+	value := a - b
+	gb.registers.Get(A).Write(value)
+
+	if value == 0 {
+		gb.registers.SetFlag(flagZ)
+	} else {
+		gb.registers.ResetFlag(flagZ)
+	}
+
+	gb.registers.SetFlag(flagN)
+
+	if util.HalfBorrow(a, b) {
+		gb.registers.SetFlag(flagH)
+	} else {
+		gb.registers.ResetFlag(flagH)
+	}
+
+	if util.Borrow(a, b) {
 		gb.registers.SetFlag(flagC)
 	} else {
 		gb.registers.ResetFlag(flagC)
