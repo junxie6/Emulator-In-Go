@@ -1,5 +1,9 @@
 package cpu
 
+import (
+	"github.com/KeyOneLi/Emulator-In-Go/gameboy/util"
+)
+
 // InstructionInfo shows detail info of an instruction
 type InstructionInfo struct {
 	Opcode      string   `json:"opcode"`
@@ -23,7 +27,7 @@ func (gb *GBCpu) instructions(opcode byte) (cycle int) {
 	panic("to do")
 }
 
-func (gb *GBCpu) _LD(opcode byte, params []registerID) {
+func (gb *GBCpu) ld(opcode byte, params []registerID) {
 	p1, p2 := params[0], params[1]
 	var value uint16
 	switch opcode {
@@ -47,12 +51,35 @@ func (gb *GBCpu) _LD(opcode byte, params []registerID) {
 		gb.registers.Get(A).Write(value)
 	case 0xf8:
 		n := int8(gb.load8bits())
+		gb.registers.ResetFlag(flagZ)
+		gb.registers.ResetFlag(flagN)
+
+		flagHalfCarry, flagCarry := false, false
+
 		if n < 0 {
-			// TODO: carry flag?
-			value = gb.registers.Get(PC).Read() - uint16(-n)
+			a := gb.registers.Get(SP).Read()
+			b := uint16(-n)
+			value = a - b
+			flagHalfCarry, flagCarry = util.HalfCarryForSub(a, b), util.CarryForSub(a, b)
 		} else {
-			value = uint16(n) + gb.registers.Get(PC).Read()
+			a := gb.registers.Get(SP).Read()
+			b := uint16(n)
+			value = a + b
+			flagHalfCarry, flagCarry = util.HalfCarryForAdd(a, b), util.CarryForAdd(a, b)
 		}
+
+		if flagCarry {
+			gb.registers.SetFlag(flagC)
+		} else {
+			gb.registers.ResetFlag(flagC)
+		}
+
+		if flagHalfCarry {
+			gb.registers.SetFlag(flagH)
+		} else {
+			gb.registers.ResetFlag(flagH)
+		}
+
 		gb.registers.Get(HL).Write(value)
 	case 0x08:
 		nn := gb.load16bits()
@@ -91,11 +118,62 @@ func (gb *GBCpu) _LD(opcode byte, params []registerID) {
 	}
 }
 
-func (gb *GBCpu) _8bitsLDr1r2(param paramWraper) (cycle int) {
-	panic("to do")
-	//return param.cycles
+func (gb *GBCpu) push(opcode byte, params []registerID) {
+	sp := gb.registers.Get(SP).Read()
+	r := gb.registers.Get(params[0]).(*Register16bit)
+
+	gb.memory.WriteAt(sp, r.ReadLo())
+	gb.memory.WriteAt(sp-1, r.ReadHi())
+	gb.registers.Get(SP).Write(sp - 2)
 }
 
-func (gb *GBCpu) _8bitsLDAorC(param paramWraper) (cycle int) {
-	panic("to do")
+func (gb *GBCpu) pop(opcode byte, params []registerID) {
+	sp := gb.registers.Get(SP).Read()
+
+	hi := gb.memory.ReadAt(sp)
+	lo := gb.memory.ReadAt(sp + 1)
+
+	value := util.ByteCombine(hi, lo)
+
+	gb.registers.Get(params[0]).Write(value)
+	gb.registers.Get(SP).Write(sp + 2)
+}
+
+func (gb *GBCpu) add(opcode byte, params []registerID) {
+	// p1 := params[0]
+
+	p2 := params[1]
+	var a, b uint16
+
+	a = gb.registers.Get(A).Read()
+	switch p2 {
+	case N:
+		b = uint16(gb.load8bits())
+	case NN:
+		//invalid?
+		panic("invalid")
+	default:
+		b = gb.registers.Get(p2).Read()
+	}
+	value := a + b
+	gb.registers.Get(A).Write(value)
+
+	gb.registers.ResetFlag(flagN)
+	if value&0xff == 0 {
+		gb.registers.SetFlag(flagZ)
+	} else {
+		gb.registers.ResetFlag(flagZ)
+	}
+
+	if util.HalfCarryForAdd(a, b) {
+		gb.registers.SetFlag(flagH)
+	} else {
+		gb.registers.ResetFlag(flagH)
+	}
+
+	if util.CarryForAdd(a, b) {
+		gb.registers.SetFlag(flagH)
+	} else {
+		gb.registers.ResetFlag(flagH)
+	}
 }
