@@ -2,11 +2,13 @@ package cpu
 
 import "fmt"
 
+// Register interface for register
 type Register interface {
 	Write(value uint16)
 	Read() uint16
 }
 
+// Register8bitWrap wrap 16bit register to 8bit
 type Register8bitWrap struct {
 	write func(value byte)
 	read  func() byte
@@ -20,18 +22,21 @@ func (r *Register8bitWrap) Read() uint16 {
 	return uint16(r.read())
 }
 
+//RegisterPool struct to easily operate Register, both 8 bits and 16 bits
 type RegisterPool struct {
 	list map[registerID]*Register16bit
 }
 
+//NewRegisterPool constructor for instance RegisterPool
 func NewRegisterPool() *RegisterPool {
 	return &RegisterPool{
 		list: preloadRegister(),
 	}
 }
 
+//Get get register A,F,AF,B,C,BC,D,E,DE,H,L,HL,PC,SP
 func (p *RegisterPool) Get(id registerID) Register {
-	// var id registerID
+
 	var _id registerID
 	switch id {
 	case A, F, AF:
@@ -64,6 +69,30 @@ func (p *RegisterPool) Get(id registerID) Register {
 	default:
 		panic(fmt.Sprintf("unknow id %d", id))
 	}
+}
+
+//GetFlag Z, N, H, C
+func (p *RegisterPool) GetFlag(f byte) bool {
+	value := byte(p.Get(F).Read())
+
+	return value&f == f
+}
+
+//ResetFlag Z, N, H, C
+func (p *RegisterPool) ResetFlag(f byte) {
+	r := p.Get(F)
+	value := byte(r.Read())
+
+	value = value & (^f)
+	r.Write(uint16(value))
+}
+
+//SetFlag Z, N, H, C
+func (p *RegisterPool) SetFlag(f byte) {
+	r := p.Get(F)
+	value := byte(r.Read())
+	value = value | f
+	r.Write(uint16(value))
 }
 
 //Register16bit define 16bit register
