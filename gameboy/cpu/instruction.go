@@ -177,3 +177,35 @@ func (gb *GBCpu) add(opcode byte, params []registerID) {
 		gb.registers.ResetFlag(flagH)
 	}
 }
+
+func (gb *GBCpu) adc(opcode byte, params []registerID) {
+	var carry uint16
+	p2 := params[1]
+
+	if gb.registers.GetFlag(flagC) {
+		carry = 1
+	}
+
+	n := gb.registers.Get(p2).Read()
+	a := gb.registers.Get(A).Read()
+	gb.registers.Get(A).Write(a + n + carry)
+
+	gb.registers.ResetFlag(flagN)
+	if a+n+carry == 0 {
+		gb.registers.SetFlag(flagZ)
+	} else {
+		gb.registers.ResetFlag(flagZ)
+	}
+
+	if util.HalfCarryForAdd(a, n) || util.HalfCarryForAdd(a+n, carry) {
+		gb.registers.SetFlag(flagH)
+	} else {
+		gb.registers.ResetFlag(flagH)
+	}
+
+	if util.CarryForAdd(a, n) || util.CarryForAdd(a+n, carry) {
+		gb.registers.SetFlag(flagC)
+	} else {
+		gb.registers.ResetFlag(flagC)
+	}
+}
