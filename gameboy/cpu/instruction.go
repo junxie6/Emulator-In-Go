@@ -300,7 +300,6 @@ func (gb *GBCpu) sbc(opcode byte, params []registerID) {
 }
 
 func (gb *GBCpu) and(opcode byte, params []registerID) {
-
 	var a, b uint16
 	a = gb.registers.Get(A).Read()
 	switch params[0] {
@@ -324,4 +323,56 @@ func (gb *GBCpu) and(opcode byte, params []registerID) {
 	gb.registers.ResetFlag(flagN)
 	gb.registers.ResetFlag(flagC)
 	gb.registers.SetFlag(flagH)
+}
+
+func (gb *GBCpu) or(opcode byte, params []registerID) {
+	var a, b uint16
+	a = gb.registers.Get(A).Read()
+	switch params[0] {
+	case N:
+		b = uint16(gb.load8bits())
+	case NN:
+		panic("invalid")
+	default:
+		b = gb.registers.Get(params[1]).Read()
+	}
+
+	value := a | b
+	gb.registers.Get(A).Write(value)
+
+	if value == 0 {
+		gb.registers.SetFlag(flagZ)
+	} else {
+		gb.registers.ResetFlag(flagZ)
+	}
+
+	gb.registers.ResetFlag(flagN)
+	gb.registers.ResetFlag(flagC)
+	gb.registers.ResetFlag(flagH)
+}
+
+func (gb *GBCpu) xor(opcode byte, params []registerID) {
+	var a, b uint16
+	a = gb.registers.Get(A).Read()
+	switch params[0] {
+	case N:
+		b = uint16(gb.load8bits())
+	case NN:
+		panic("invalid")
+	default:
+		b = gb.registers.Get(params[1]).Read()
+	}
+
+	value := a ^ b
+	gb.registers.Get(A).Write(value)
+
+	if value == 0 {
+		gb.registers.SetFlag(flagZ)
+	} else {
+		gb.registers.ResetFlag(flagZ)
+	}
+
+	gb.registers.ResetFlag(flagN)
+	gb.registers.ResetFlag(flagC)
+	gb.registers.ResetFlag(flagH)
 }
