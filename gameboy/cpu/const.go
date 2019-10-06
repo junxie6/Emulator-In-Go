@@ -2,8 +2,6 @@ package cpu
 
 type registerID int
 
-const HiLoMagic = 3
-
 const (
 	A registerID = iota
 	F
@@ -17,15 +15,20 @@ const (
 	H
 	L
 	HL
-
-	//use to distinguish opcode params
-	_
-	N  //8bits load
-	NN //16bits load
-	Split
-
 	SP
 	PC
+
+	N  //8bits load
+	NN //16bits load
+)
+
+type flag byte
+
+const (
+	flagZ byte = 0x80 >> iota
+	flagN
+	flagH
+	flagC
 )
 
 const (
