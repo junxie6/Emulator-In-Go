@@ -179,14 +179,22 @@ func (gb *GBCpu) add(opcode byte, params []registerID) {
 }
 
 func (gb *GBCpu) adc(opcode byte, params []registerID) {
-	var carry uint16
+	var carry, n uint16
 	p2 := params[1]
 
 	if gb.registers.GetFlag(flagC) {
 		carry = 1
 	}
 
-	n := gb.registers.Get(p2).Read()
+	switch p2 {
+	case N:
+		n = uint16(gb.load8bits())
+	case NN:
+		panic("invalid")
+	default:
+		n = gb.registers.Get(p2).Read()
+	}
+
 	a := gb.registers.Get(A).Read()
 	gb.registers.Get(A).Write(a + n + carry)
 
@@ -242,6 +250,49 @@ func (gb *GBCpu) sub(opcode byte, params []registerID) {
 	}
 
 	if util.Borrow(a, b) {
+		gb.registers.SetFlag(flagC)
+	} else {
+		gb.registers.ResetFlag(flagC)
+	}
+}
+
+func (gb *GBCpu) sbc(opcode byte, params []registerID) {
+
+	var carry uint16
+	if gb.registers.GetFlag(flagC) {
+		carry = 1
+	}
+
+	var n uint16
+	a := gb.registers.Get(A).Read()
+
+	switch params[1] {
+	case N:
+		n = uint16(gb.load8bits())
+	case NN:
+		panic("invalid")
+	default:
+		n = gb.registers.Get(params[1]).Read()
+	}
+
+	value := a - n - carry
+	gb.registers.Get(A).Write(value)
+
+	if value == 0 {
+		gb.registers.SetFlag(flagZ)
+	} else {
+		gb.registers.ResetFlag(flagZ)
+	}
+
+	gb.registers.SetFlag(flagN)
+
+	if util.HalfBorrow(a, n) || util.HalfBorrow(a-n, carry) {
+		gb.registers.SetFlag(flagH)
+	} else {
+		gb.registers.ResetFlag(flagH)
+	}
+
+	if util.Borrow(a, n) || util.Borrow(a-n, carry) {
 		gb.registers.SetFlag(flagC)
 	} else {
 		gb.registers.ResetFlag(flagC)
