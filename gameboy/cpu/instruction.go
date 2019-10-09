@@ -623,3 +623,68 @@ func (gb *GBCpu) rra(opcode byte, params []registerID) {
 func (gb *GBCpu) rlc(opcode byte, params []registerID) {
 	panic("to do")
 }
+
+func (gb *GBCpu) rl(opcode byte, params []registerID) {
+	panic("to do")
+}
+
+func (gb *GBCpu) rrc(opcode byte, params []registerID) {
+	panic("to do")
+}
+
+func (gb *GBCpu) rr(opcode byte, params []registerID) {
+	panic("to do")
+}
+
+func (gb *GBCpu) sla(opcode byte, params []registerID) {
+	panic("to do")
+}
+
+func (gb *GBCpu) sra(opcode byte, params []registerID) {
+	panic("to do")
+}
+
+func (gb *GBCpu) srl(opcode byte, params []registerID) {
+	panic("to do")
+}
+
+func (gb *GBCpu) bit(opcode byte, params []registerID) {
+	panic("to do")
+}
+
+func (gb *GBCpu) set(opcode byte, params []registerID) {
+	panic("to do")
+}
+
+func (gb *GBCpu) res(opcode byte, params []registerID) {
+	panic("to do")
+}
+
+func (gb *GBCpu) jp(opcode byte, params []registerID) {
+	addr := gb.registers.Get(PC).Read()
+
+	switch opcode {
+	case 0xc3:
+		addr = gb.load16bits()
+	case 0xc2:
+		if !gb.registers.GetFlag(flagZ) {
+			addr = gb.load16bits()
+		}
+	case 0xca:
+		if gb.registers.GetFlag(flagZ) {
+			addr = gb.load16bits()
+		}
+	case 0xd2:
+		if !gb.registers.GetFlag(flagC) {
+			addr = gb.load16bits()
+		}
+	case 0xda:
+		if gb.registers.GetFlag(flagC) {
+			addr = gb.load16bits()
+		}
+	case 0xe9:
+		addr = gb.registers.Get(HL).Read()
+	}
+
+	gb.registers.Get(PC).Write(addr)
+}
