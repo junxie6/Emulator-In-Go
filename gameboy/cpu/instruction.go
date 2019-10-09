@@ -742,4 +742,37 @@ func (gb *GBCpu) jr(opcode byte, params []registerID) {
 			addr += uint16(n)
 		}
 	}
+	gb.registers.Get(PC).Write(addr)
+}
+
+func (gb *GBCpu) call(opcode byte, params []registerID) {
+	addr := gb.registers.Get(PC).Read()
+
+	switch opcode {
+	case 0xcd:
+		nn := gb.load16bits()
+
+		//function reuse need validation
+		gb.push(0x00, []registerID{PC})
+		addr = nn
+
+	case 0xc4:
+		if !gb.registers.GetFlag(flagZ) {
+			addr = gb.load16bits()
+		}
+	case 0xcc:
+		if gb.registers.GetFlag(flagZ) {
+			addr = gb.load16bits()
+		}
+	case 0xd4:
+		if !gb.registers.GetFlag(flagC) {
+			addr = gb.load16bits()
+		}
+	case 0xdc:
+		if gb.registers.GetFlag(flagC) {
+			addr = gb.load16bits()
+		}
+	}
+
+	gb.registers.Get(PC).Write(addr)
 }
