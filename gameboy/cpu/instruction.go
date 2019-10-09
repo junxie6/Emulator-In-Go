@@ -688,3 +688,58 @@ func (gb *GBCpu) jp(opcode byte, params []registerID) {
 
 	gb.registers.Get(PC).Write(addr)
 }
+
+func (gb *GBCpu) jr(opcode byte, params []registerID) {
+	addr := gb.registers.Get(PC).Read()
+
+	switch opcode {
+	case 0x18:
+		panic("instruction unclear")
+		un := gb.load8bits()
+		n := int8(un)
+		if n < 0 {
+			un = byte(-n)
+		}
+		addr += uint16(n)
+	case 0x20:
+		panic("instruction unclear")
+		if !gb.registers.GetFlag(flagZ) {
+			un := gb.load8bits()
+			n := int8(un)
+			if n < 0 {
+				un = byte(-n)
+			}
+			addr += uint16(n)
+		}
+	case 0x28:
+		panic("instruction unclear")
+		if gb.registers.GetFlag(flagZ) {
+			un := gb.load8bits()
+			n := int8(un)
+			if n < 0 {
+				un = byte(-n)
+			}
+			addr += uint16(n)
+		}
+	case 0x30:
+		panic("instruction unclear")
+		if !gb.registers.GetFlag(flagC) {
+			un := gb.load8bits()
+			n := int8(un)
+			if n < 0 {
+				un = byte(-n)
+			}
+			addr += uint16(n)
+		}
+	case 0x38:
+		panic("instruction unclear")
+		if gb.registers.GetFlag(flagC) {
+			un := gb.load8bits()
+			n := int8(un)
+			if n < 0 {
+				un = byte(-n)
+			}
+			addr += uint16(n)
+		}
+	}
+}
