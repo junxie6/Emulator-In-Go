@@ -563,3 +563,63 @@ func (gb *GBCpu) rla(opcode byte, params []registerID) {
 		gb.registers.SetFlag(flagC)
 	}
 }
+
+func (gb *GBCpu) rrca(opcode byte, params []registerID) {
+	a := gb.registers.Get(A)
+
+	value := byte(a.Read())
+	oldBit0 := (value & 0x1)
+
+	value = (value >> 1) | (oldBit0 << 7)
+
+	a.Write(uint16(value))
+
+	if value == 0 {
+		gb.registers.SetFlag(flagZ)
+	} else {
+		gb.registers.ResetFlag(flagZ)
+	}
+	gb.registers.ResetFlag(flagN)
+	gb.registers.ResetFlag(flagH)
+
+	if oldBit0 == 0 {
+		gb.registers.ResetFlag(flagC)
+	} else {
+		gb.registers.SetFlag(flagC)
+	}
+}
+
+func (gb *GBCpu) rra(opcode byte, params []registerID) {
+
+	var newBit7 byte = 0
+
+	if gb.registers.GetFlag(flagC) {
+		newBit7 = 1
+	}
+	a := gb.registers.Get(A)
+
+	value := byte(a.Read())
+	oldBit0 := (value & 0x1)
+
+	value = (value >> 1) | (newBit7 << 7)
+
+	a.Write(uint16(value))
+
+	if value == 0 {
+		gb.registers.SetFlag(flagZ)
+	} else {
+		gb.registers.ResetFlag(flagZ)
+	}
+	gb.registers.ResetFlag(flagN)
+	gb.registers.ResetFlag(flagH)
+
+	if oldBit0 == 0 {
+		gb.registers.ResetFlag(flagC)
+	} else {
+		gb.registers.SetFlag(flagC)
+	}
+}
+
+func (gb *GBCpu) rlc(opcode byte, params []registerID) {
+	panic("to do")
+}
