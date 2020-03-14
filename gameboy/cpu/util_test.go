@@ -71,3 +71,35 @@ func TestParseRawInstructionMap(t *testing.T) {
 		}
 	}
 }
+
+func TestParseRawCBPrefixInstructionMap(t *testing.T) {
+	target := "./cb_prefix_instruction"
+	os.Remove(target)
+	outputfile, err := os.OpenFile(target, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
+	if err != nil {
+		panic(err)
+	}
+	defer outputfile.Close()
+	list := map[string]map[uint16]paramWraper{
+		"SWAP": mapSWAP,
+		"RLC":  mapRLC,
+		"RL":   mapRL,
+		"RRC":  mapRRC,
+		"RR":   mapRR,
+		"SLA":  mapSLA,
+		"SRA":  mapSRA,
+		"SRL":  mapSRL,
+		"BIT":  mapBITbr,
+		"SET":  mapSETbr,
+		"RES":  mapRESbr,
+	}
+
+	instructions := ParseRawCBPrefixInstructionMap(list)
+	encoder := json.NewEncoder(outputfile)
+	log.Println(len(instructions))
+	for _, ins := range instructions {
+		if err := encoder.Encode(&ins); err != nil {
+			panic(err)
+		}
+	}
+}

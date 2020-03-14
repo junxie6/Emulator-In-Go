@@ -63,6 +63,47 @@ func ParseRawInstructionMap(list map[string]map[byte]paramWraper) []*Instruction
 	return rtn
 }
 
+func ParseRawCBPrefixInstructionMap(list map[string]map[uint16]paramWraper) []*CBPrefixInstructionInfo {
+	rtn := make([]*CBPrefixInstructionInfo, 0x100)
+
+	mapRegName := map[registerID]string{
+		A: "A", B: "B", C: "C", D: "D",
+		E: "E", F: "F", AF: "AF", BC: "BC",
+		DE: "DE", H: "H", L: "L", HL: "HL",
+		NN: "NN", N: "N", SP: "SP", PC: "PC",
+	}
+
+	lowbyte := func(opcode uint16) byte {
+		return byte(opcode & 0x00ff)
+	}
+
+	for name := range list {
+		for opcode := range list[name] {
+			fmt.Printf("%04x %02x \n", opcode, lowbyte(opcode))
+			if rtn[lowbyte(opcode)] != nil {
+				log.Panic(fmt.Sprintf("duplicate opcode %04x, instruction %s and %s", opcode, name, rtn[lowbyte(opcode)].Instruction))
+			}
+			rtn[lowbyte(opcode)] = &CBPrefixInstructionInfo{
+				Instruction: name,
+				Params: func() []string {
+					p := []string{}
+					for _, id := range list[name][opcode].params {
+						if _, ok := mapRegName[id]; !ok {
+							log.Panic("unknow id %id", id)
+						}
+						p = append(p, mapRegName[id])
+					}
+					return p
+				}(),
+				Opcode: fmt.Sprintf("0x%04x", opcode),
+				Code:   opcode,
+				Cycles: list[name][opcode].cycles,
+			}
+		}
+	}
+	return rtn
+}
+
 func atoi(s string) registerID {
 	mapRegName := map[string]registerID{
 		"A": A, "B": B, "C": C, "D": D,

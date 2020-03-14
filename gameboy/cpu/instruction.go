@@ -13,6 +13,14 @@ type InstructionInfo struct {
 	Cycles      int      `json:"cycles"`
 }
 
+type CBPrefixInstructionInfo struct {
+	Opcode      string   `json:"opcode"`
+	Instruction string   `json:"instruction"`
+	Params      []string `json:"params"`
+	Code        uint16   `json:"code"`
+	Cycles      int      `json:"cycles"`
+}
+
 func (in *InstructionInfo) GetParams() []registerID {
 	rtn := []registerID{}
 
